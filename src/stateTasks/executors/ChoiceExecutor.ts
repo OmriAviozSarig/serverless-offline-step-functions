@@ -103,8 +103,8 @@ export class ChoiceExecutor extends StateTypeExecutor {
 
     // TODO: Find a better way to map the comparators with the methods without using factories or strategy
     switch (comparator) {
-      case "IsPresent":
-        return choiceValue ? inputValue !== undefined : inputValue === undefined;  
+      case 'IsPresent':
+        return choiceValue ? inputValue !== undefined : inputValue === undefined;
       case 'BooleanEquals':
       case 'NumericEquals':
       case 'StringEquals':

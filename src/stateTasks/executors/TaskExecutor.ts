@@ -149,7 +149,7 @@ export class TaskExecutor extends StateTypeExecutor {
       await fs.access(webpackPath, FsConstants.F_OK | FsConstants.R_OK);
       filePathResolved = webpackPath;
     } catch (error) {
-      filePathResolved = path.resolve(process.cwd(), `./${lambdaFilePath}.js`);
+      filePathResolved = path.resolve(process.cwd(), `./.build/${lambdaFilePath}.js`);
     }
 
     return filePathResolved;
