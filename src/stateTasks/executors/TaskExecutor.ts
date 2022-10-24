@@ -28,17 +28,22 @@ export class TaskExecutor extends StateTypeExecutor {
     const input = this.processInput(inputJson, stateDefinition, context);
     const lambdaPath = await this.getWebpackOrCommonFuction(stateInfo.handlerPath);
     const functionLambda = await import(`${lambdaPath}`);
-
+    let exec_output, exec_error;
     this.envVarResolver.injectEnvVarsLambdaSpecific(stateInfo.environment);
-
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    let output: any;
+    const callback = (err, res) => {
+      exec_output = res;
+      exec_error = err;
+    };
     try {
       if (stateDefinition.Retry) {
-        const retriers = Retriers.create(stateDefinition.Retry);
-        output = await retriers.retry(() => functionLambda[stateInfo.handlerName](input, context), context);
+        const retries = Retriers.create(stateDefinition.Retry);
+        await retries.retry(() => functionLambda[stateInfo.handlerName](input, context, callback), context);
       } else {
-        output = await functionLambda[stateInfo.handlerName](input, context);
+        await functionLambda[stateInfo.handlerName](input, context, callback);
+        console.log(`the result is:${exec_output}`);
+      }
+      if (exec_error) {
+        throw exec_error;
       }
     } catch (error) {
       this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
@@ -46,14 +51,14 @@ export class TaskExecutor extends StateTypeExecutor {
       return this.dealWithError(stateDefinition, error, input);
     }
 
-    // Default ot Empty object if output is from a void function
-    if (output === undefined) {
-      output = {};
+    // Default ot Empty object if exec_output is from a void function
+    if (exec_output === undefined) {
+      exec_output = {};
     }
 
     this.envVarResolver.removeEnvVarsLambdaSpecific(stateInfo.environment);
 
-    const outputJson = this.processOutput(JSON.parse(inputJson || '{}'), output, stateDefinition);
+    const outputJson = this.processOutput(JSON.parse(inputJson || '{}'), exec_output, stateDefinition);
 
     return {
       Next: stateDefinition.Next,
