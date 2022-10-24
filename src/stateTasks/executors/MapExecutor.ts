@@ -130,15 +130,15 @@ export class MapExecutor extends StateTypeExecutor {
   // TODO: Extract to a common place for Map & Task executors
   private processInput(json: string | undefined, stateDefinition: MapStateDefinition, context: Context): unknown[] {
     this.logger.debug(`MapExecutor - processInput1 - ${json}`);
-    const proccessedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
-    const proccessedItemsJson = StateProcessor.processItemsPath(proccessedInputJson, stateDefinition.ItemsPath);
+    const processedInputJson = StateProcessor.processInputPath(json, stateDefinition.InputPath);
+    const processedItemsJson = StateProcessor.processItemsPath(processedInputJson, stateDefinition.ItemsPath);
 
     let processedItems: unknown;
     try {
-      processedItems = JSON.parse(proccessedItemsJson);
+      processedItems = JSON.parse(processedItemsJson);
     } catch (error) {
       this.logger.error(
-        `MapExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${proccessedItemsJson}"`,
+        `MapExecutor.processInput: Could not parse JSON for state ${context.State.Name}: "${processedItemsJson}"`,
       );
       throw error;
     }
